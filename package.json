@@ -1,0 +1,22 @@
+{
+  "name": "frozenbet-ext-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "External mock API to simulate competitions, matches, and users for a sports betting backend.",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "lint": "echo 'no linter configured'"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "morgan": "^1.10.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+
