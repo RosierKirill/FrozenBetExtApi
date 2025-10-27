@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -57,4 +57,3 @@ model Match {
   homeTeam    Team        @relation("homeTeam", fields: [homeTeamId], references: [id])
   awayTeam    Team        @relation("awayTeam", fields: [awayTeamId], references: [id])
 }
-

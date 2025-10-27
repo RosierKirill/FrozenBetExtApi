@@ -6,9 +6,10 @@ Description
 Install
 - Requires Node.js 18+
 - Run: `npm install`
-- Generate Prisma client: `npm run prisma:generate`
-- Create DB schema: `npm run prisma:push`
-- Seed NHL data: `npm run db:seed`
+- Set `DATABASE_URL` in Vercel Project Settings. If using Vercel Postgres, copy `POSTGRES_PRISMA_URL` into `DATABASE_URL`.
+- Generate Prisma client locally: `npm run prisma:generate`
+- Create DB schema locally against your Vercel Postgres URL: `npm run prisma:migrate` (or `npm run prisma:push` for dev)
+- Seed NHL data locally: `npm run db:seed`
 
 Run
 - Start: `npm start`
@@ -28,9 +29,15 @@ Endpoints (GET)
 - `GET /teams/:id` → Team by id
 
 Notes
-- Competitions, teams, and matches are stored in `prisma/dev.db` (SQLite) and seeded with real NHL teams and sample fixtures.
-- `/reload?seed=...` now only affects synthetic users (not DB data).
+- Deployment target is Vercel Serverless Functions. The Express app is exported via `api/index.js`. Routes are accessible under `/api/...` (e.g. `/api/competitions`).
+- Use Vercel Postgres or any managed Postgres. On Vercel, set `DATABASE_URL` to the pooled Prisma URL.
+- `/reload?seed=...` only affects synthetic users (not DB data).
 - The shape of returned objects follows the Prisma schema; users are synthetic to satisfy the requested `GET /users` integration.
+
+Deploy (Vercel)
+- Connect the repo to Vercel.
+- In Project → Settings → Environment Variables, add `DATABASE_URL` with your Postgres Prisma URL.
+- Deploy. Endpoints: `/api/health`, `/api/competitions`, `/api/matches`, `/api/teams`, `/api/users`.
 
 Examples
 - `GET http://localhost:4001/competitions`

@@ -44,54 +44,56 @@ function randomInt(min, max) {
 async function main() {
   console.log('Seeding database with NHL data...');
 
-  // Ensure schema exists (workaround if prisma db push is unavailable)
-  await prisma.$executeRawUnsafe(
-    `PRAGMA foreign_keys = ON;`,
-  );
-  await prisma.$executeRawUnsafe(
-    `CREATE TABLE IF NOT EXISTS Competition (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      themeId INTEGER,
-      name TEXT NOT NULL,
-      description TEXT,
-      startDate DATETIME NOT NULL,
-      endDate DATETIME NOT NULL,
-      season TEXT NOT NULL,
-      status TEXT NOT NULL,
-      createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-    );`
-  );
-  await prisma.$executeRawUnsafe(
-    `CREATE TABLE IF NOT EXISTS Team (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      competitionId INTEGER,
-      name TEXT NOT NULL,
-      shortName TEXT,
-      logoUrl TEXT,
-      country TEXT,
-      externalApiId TEXT,
-      createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      CONSTRAINT Team_competitionId_fkey FOREIGN KEY (competitionId) REFERENCES Competition(id) ON DELETE SET NULL ON UPDATE CASCADE
-    );`
-  );
-  await prisma.$executeRawUnsafe(
-    `CREATE TABLE IF NOT EXISTS Match (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      competitionId INTEGER NOT NULL,
-      homeTeamId INTEGER NOT NULL,
-      awayTeamId INTEGER NOT NULL,
-      scheduledDate DATETIME NOT NULL,
-      status TEXT NOT NULL,
-      homeScore INTEGER,
-      awayScore INTEGER,
-      location TEXT,
-      createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      CONSTRAINT Match_competitionId_fkey FOREIGN KEY (competitionId) REFERENCES Competition(id) ON DELETE CASCADE ON UPDATE CASCADE,
-      CONSTRAINT Match_homeTeamId_fkey FOREIGN KEY (homeTeamId) REFERENCES Team(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-      CONSTRAINT Match_awayTeamId_fkey FOREIGN KEY (awayTeamId) REFERENCES Team(id) ON DELETE RESTRICT ON UPDATE CASCADE
-    );`
-  );
+  // Ensure schema exists only for SQLite dev fallback. For Postgres, use prisma migrate/push.
+  const url = process.env.DATABASE_URL || '';
+  const isSQLite = url.startsWith('file:') || url.includes('sqlite');
+  if (isSQLite) {
+    await prisma.$executeRawUnsafe(`PRAGMA foreign_keys = ON;`);
+    await prisma.$executeRawUnsafe(
+      `CREATE TABLE IF NOT EXISTS "Competition" (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        themeId INTEGER,
+        name TEXT NOT NULL,
+        description TEXT,
+        startDate DATETIME NOT NULL,
+        endDate DATETIME NOT NULL,
+        season TEXT NOT NULL,
+        status TEXT NOT NULL,
+        createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );`
+    );
+    await prisma.$executeRawUnsafe(
+      `CREATE TABLE IF NOT EXISTS "Team" (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        competitionId INTEGER,
+        name TEXT NOT NULL,
+        shortName TEXT,
+        logoUrl TEXT,
+        country TEXT,
+        externalApiId TEXT,
+        createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT Team_competitionId_fkey FOREIGN KEY (competitionId) REFERENCES Competition(id) ON DELETE SET NULL ON UPDATE CASCADE
+      );`
+    );
+    await prisma.$executeRawUnsafe(
+      `CREATE TABLE IF NOT EXISTS "Match" (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        competitionId INTEGER NOT NULL,
+        homeTeamId INTEGER NOT NULL,
+        awayTeamId INTEGER NOT NULL,
+        scheduledDate DATETIME NOT NULL,
+        status TEXT NOT NULL,
+        homeScore INTEGER,
+        awayScore INTEGER,
+        location TEXT,
+        createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT Match_competitionId_fkey FOREIGN KEY (competitionId) REFERENCES Competition(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT Match_homeTeamId_fkey FOREIGN KEY (homeTeamId) REFERENCES Team(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        CONSTRAINT Match_awayTeamId_fkey FOREIGN KEY (awayTeamId) REFERENCES Team(id) ON DELETE RESTRICT ON UPDATE CASCADE
+      );`
+    );
+  }
 
   // Clean existing data to keep seed idempotent in dev
   await prisma.match.deleteMany();

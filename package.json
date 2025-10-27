@@ -11,13 +11,15 @@
     "lint": "echo 'no linter configured'",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
+    "prisma:migrate": "prisma migrate dev --name init",
     "db:seed": "node prisma/seed.js"
   },
   "dependencies": {
     "express": "^4.19.2",
     "cors": "^2.8.5",
     "morgan": "^1.10.0",
-    "@prisma/client": "^5.20.0"
+    "@prisma/client": "^5.20.0",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "prisma": "^5.20.0"
