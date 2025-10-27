@@ -1,11 +1,14 @@
 FrozenBet External Mock API
 
 Description
-- Express server that simulates competitions, matches, and users for a sports betting backend. Only GET endpoints are exposed to keep integration simple for backend-to-backend calls.
+- Express server providing competitions, matches, and teams. Data now persists in SQLite via Prisma. Users remain synthetic (not persisted). Only GET endpoints are exposed to keep integration simple for backend-to-backend calls.
 
 Install
 - Requires Node.js 18+
 - Run: `npm install`
+- Generate Prisma client: `npm run prisma:generate`
+- Create DB schema: `npm run prisma:push`
+- Seed NHL data: `npm run db:seed`
 
 Run
 - Start: `npm start`
@@ -25,11 +28,11 @@ Endpoints (GET)
 - `GET /teams/:id` → Team by id
 
 Notes
-- Data is generated in-memory at startup using a deterministic PRNG for stable results. Use `/reload?seed=...` to change the seed without restarting.
-- The shape of returned objects follows your DB schema for competitions, teams, and matches; users are synthetic to satisfy the requested `GET /users` integration.
+- Competitions, teams, and matches are stored in `prisma/dev.db` (SQLite) and seeded with real NHL teams and sample fixtures.
+- `/reload?seed=...` now only affects synthetic users (not DB data).
+- The shape of returned objects follows the Prisma schema; users are synthetic to satisfy the requested `GET /users` integration.
 
 Examples
 - `GET http://localhost:4001/competitions`
 - `GET http://localhost:4001/matches?competition_id=1&status=finished`
 - `GET http://localhost:4001/users?country=FR`
-

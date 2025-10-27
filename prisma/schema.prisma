@@ -1,0 +1,60 @@
+// Prisma schema for FrozenBet External API
+// SQLite database; URL comes from .env DATABASE_URL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Competition {
+  id          Int       @id @default(autoincrement())
+  themeId     Int?
+  name        String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  season      String
+  status      String // upcoming | ongoing | ended
+  createdAt   DateTime @default(now())
+
+  teams   Team[]
+  matches Match[]
+}
+
+model Team {
+  id              Int       @id @default(autoincrement())
+  competitionId   Int?
+  name            String
+  shortName       String?
+  logoUrl         String?
+  country         String?
+  externalApiId   String?
+  createdAt       DateTime  @default(now())
+
+  competition Competition? @relation(fields: [competitionId], references: [id])
+  homeMatches Match[]      @relation("homeTeam")
+  awayMatches Match[]      @relation("awayTeam")
+}
+
+model Match {
+  id             Int       @id @default(autoincrement())
+  competitionId  Int
+  homeTeamId     Int
+  awayTeamId     Int
+  scheduledDate  DateTime
+  status         String  // scheduled | live | finished
+  homeScore      Int?
+  awayScore      Int?
+  location       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  competition Competition @relation(fields: [competitionId], references: [id])
+  homeTeam    Team        @relation("homeTeam", fields: [homeTeamId], references: [id])
+  awayTeam    Team        @relation("awayTeam", fields: [awayTeamId], references: [id])
+}
+
