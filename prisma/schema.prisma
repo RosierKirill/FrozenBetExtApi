@@ -1,4 +1,4 @@
-// Prisma schema for FrozenBet External API
+ // Prisma schema for FrozenBet External API
 // SQLite database; URL comes from .env DATABASE_URL
 
 generator client {
@@ -7,7 +7,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // Single source of truth: use only DATABASE_URL from .env
+  url = env("DATABASE_URL")
 }
 
 model Competition {
